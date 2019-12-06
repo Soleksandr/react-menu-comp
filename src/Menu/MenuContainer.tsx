@@ -85,12 +85,11 @@ const getOffset = (position: Position, isTopLeftCalculated: boolean) => {
 
 const MenuContainerStyled = styled.div<Indention & { position: Position}>(props => ({
   position: 'absolute',
+  display: 'flex',
+  flexDirection: 'column',
   top: props.top,
   left: props.left ,
   zIndex: zIndex + 1,
-  // ':focus': {
-  //   outline: 'none'
-  // }
 }))
 
 const UlStyled = styled.ul<Indention & { position: Position}>(({ top, left , position}) => ({
@@ -217,31 +216,29 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
     changeBoundingAnchorRect(anchorRef.current.getBoundingClientRect())
   }, [anchorRef])
 
-  let timeoutIndex: number | null = null
+  let timeoutIndex: any = React.useRef()
   
-  const closeMenu = (e: any) => {
-    console.log('-focusout-')
-    timeoutIndex = setTimeout(() => close(e));
-  }
+  const closeMenu = React.useCallback((e: any) => {
+    timeoutIndex.current = setTimeout(() => close(e));
+  }, [close, timeoutIndex])
 
-  const onKeyDown = (e:any) => {
-    console.log('-keydown-', e.keyCode)
+  const onKeyDown = React.useCallback((e:any) => {
     if (e.keyCode === 40 || e.keyCode === 38) {
-      const aArray = menuContainerRef.current.getElementsByTagName('a');
-      const buttonArray = menuContainerRef.current.getElementsByTagName('button');
-      const arr = [...aArray, ...buttonArray]
-      
-      const activeIndex = arr.findIndex(el => el === document.activeElement)
-      
-      console.log('= e =', timeoutIndex)
-      activeIndex === -1 || activeIndex === arr.length - 1
-      ? arr[0].focus() 
-      : arr[activeIndex + 1].focus() 
-      console.log('= inside if =', timeoutIndex)
-      timeoutIndex && clearTimeout(timeoutIndex)
+      const listItemsArray = menuContainerRef.current.getElementsByTagName('ul')[0].children
+      const focusAbleList = Array.from(listItemsArray).map((li: any) => li.firstChild)
+      const activeIndex = focusAbleList.findIndex((el: any) => el === document.activeElement)
+
+      if (activeIndex === -1) {
+        focusAbleList[0].focus()
+      } else if (e.keyCode === 40 && activeIndex !== focusAbleList.length - 1) {
+        focusAbleList[activeIndex + 1].focus()
+      } else if (e.keyCode === 38 && activeIndex) {
+        focusAbleList[activeIndex - 1].focus()
+      }
+
+      timeoutIndex && clearTimeout(timeoutIndex.current)
     }
-    // console.log('= out =', timeoutIndex)
-  }
+  }, [menuContainerRef, timeoutIndex])
 
   React.useEffect(() => {
     const anchorElement = anchorRef.current;
@@ -253,16 +250,16 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
     window.addEventListener('resize', setBoundingAnchorRect);
 
     menuContainerElement.focus()
-    menuContainerElement.addEventListener('blur', closeMenu)
+    menuContainerElement.addEventListener('focusout', closeMenu)
     menuContainerElement.addEventListener('keydown', onKeyDown)
 
     return () => {
       window.removeEventListener('resize', setBoundingAnchorRect)
 
-      menuContainerElement.removeEventListener('blur', closeMenu)
+      menuContainerElement.removeEventListener('focusout', closeMenu)
       menuContainerElement.removeEventListener('keyup', onKeyDown)
     }
-  }, [anchorRef, menuContainerRef, setBoundingAnchorRect])
+  }, [anchorRef, closeMenu, menuContainerRef, onKeyDown, setBoundingAnchorRect])
 
   const { top = 0, left = 0 } = boundingAnchorRect && boundingMenuContainerRect
     ? calculateIndentation(boundingAnchorRect, boundingMenuContainerRect) 

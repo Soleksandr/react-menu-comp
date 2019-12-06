@@ -31,7 +31,7 @@ export const Menu: React.FC<MenuProps> = ({
 
   const toggleMenu = React.useCallback(() => {
       setIsOpen(!isOpen)
-  }, [isOpen, anchorRef]);
+  }, [isOpen]);
 
   React.useEffect(() => {
     const anchorElement = anchorRef.current;
@@ -44,28 +44,18 @@ export const Menu: React.FC<MenuProps> = ({
     };
   }, [anchorRef, toggleMenu])
 
-  return isOpen
-          ? ReactDOM.createPortal(
-              <MenuContainer 
-                anchorRef={anchorRef} 
-                position={position} 
-                alignment={alignment} 
-                close={toggleMenu}
-              >
-                {children}
-              </MenuContainer>, anchorRef.current.ownerDocument.body
-            )
-          : null
-  // return ReactDOM.createPortal(
-  //   <MenuContainer 
-  //     anchorRef={anchorRef} 
-  //     position={position} 
-  //     alignment={alignment} 
-  //     close={toggleMenu}
-  //   >
-  //     {children}
-  //   </MenuContainer>,  anchorRef.current ? anchorRef.current.ownerDocument.body : document.body
-  // )
+  return isOpen || true
+    ? ReactDOM.createPortal(
+        <MenuContainer 
+          anchorRef={anchorRef} 
+          position={position} 
+          alignment={alignment} 
+          close={toggleMenu}
+        >
+          {children}
+        </MenuContainer>, anchorRef.current ? anchorRef.current.ownerDocument.body : document.body
+      )
+    : null
 }
 
 export default Menu;

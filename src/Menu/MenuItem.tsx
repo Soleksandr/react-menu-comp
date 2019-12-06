@@ -22,10 +22,9 @@ export const LiStyled = styled.li({
     },
   
   '& > a, & > button': {
-    display: 'block',
-    fontSize: '100%',
-    width: '100%',
+    display: 'flex',
     border: 'none',
+    fontSize: '1em',
     textAlign: 'left',
     padding: '7px 12px',
     background: 'transparent',
