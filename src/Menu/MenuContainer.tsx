@@ -19,6 +19,7 @@ interface MenuContainerProps {
   anchorRef: React.RefObject<any>;
   position: Position;
   alignment: Alignment;
+  close: (e: MouseEvent) => any;
 }
 
 const pickBoxShadow = (position: Position) => {
@@ -87,6 +88,9 @@ const MenuContainerStyled = styled.div<Indention & { position: Position}>(props 
   top: props.top,
   left: props.left ,
   zIndex: zIndex + 1,
+  ':focus': {
+    outline: 'none'
+  }
 }))
 
 const UlStyled = styled.ul<Indention & { position: Position}>(({ top, left , position}) => ({
@@ -102,7 +106,7 @@ const UlStyled = styled.ul<Indention & { position: Position}>(({ top, left , pos
   ...getOffset(position, Boolean(top && left))
 }))
 
-export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRef, position, alignment }) => {
+export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRef, position, alignment, close }) => {
   let menuContainerRef: any;
   menuContainerRef =  React.useRef();
 
@@ -205,7 +209,7 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
       default:
         indention = _calculateDefaultIndentation(boundingAnchorRect, offset);
     }
-    console.log(indention)
+
     return indention;
   }
 
@@ -217,10 +221,15 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
     const anchorElement = anchorRef.current;
     changeBoundingAnchorRect(anchorElement.getBoundingClientRect());
     changeBoundingMenuContainerRect(menuContainerRef.current.getBoundingClientRect())
+
     window.addEventListener('resize', setBoundingAnchorRect);
+
+    menuContainerRef.current.focus()
+    menuContainerRef.current.addEventListener('focusout', close)
 
     return () => {
       window.removeEventListener('resize', setBoundingAnchorRect)
+      menuContainerRef.current.removeEventListener('focusout', close)
     }
   }, [anchorRef, menuContainerRef, setBoundingAnchorRect])
 
@@ -229,9 +238,22 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
     : {}
 
   return (
-    <MenuContainerStyled ref={menuContainerRef} top={top} left={left} position={position}>
-      <UlStyled data-menu="list" top={top} left={left} position={position}>
-        {children}
+    <MenuContainerStyled ref={menuContainerRef} top={top} left={left} position={position} tabIndex={0}>
+      <UlStyled 
+        top={top} 
+        left={left} 
+        position={position} 
+      >
+        {
+          React.Children.map(children, (child) => {
+            return React.isValidElement(child) 
+              ? React.cloneElement(
+                  child, 
+                  { onClick: (e: MouseEvent) => { child.props.onClick(e); close(e) } }
+                )
+              : child
+          })
+        }
       </UlStyled>
     </MenuContainerStyled>
   ) 

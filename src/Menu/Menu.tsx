@@ -30,39 +30,33 @@ export const Menu: React.FC<MenuProps> = ({
   } 
 
   const toggleMenu = React.useCallback(() => {
-      anchorRef.current.parentElement.focus();
+    console.log('-- toggle --')
       setIsOpen(!isOpen)
   }, [isOpen, anchorRef]);
 
-  const closeMenuIfOpen = React.useCallback(() => {
-    setIsOpen(false)
-  }, [])
-
-
   React.useEffect(() => {
     const anchorElement = anchorRef.current;
-
     anchorElement.addEventListener('click', toggleMenu);
     anchorElement.addEventListener('mousedown', preventDefault);
-    anchorElement.parentElement.addEventListener('blur', closeMenuIfOpen)
 
     return () => {
       anchorElement.removeEventListener('click', toggleMenu);
       anchorElement.removeEventListener('mousedown', preventDefault);
-      anchorElement.parentElement.removeEventListener('blur', closeMenuIfOpen)
     };
-  }, [anchorRef, toggleMenu, closeMenuIfOpen])
-
-  if (anchorRef.current) {
-    anchorRef.current.ownerDocument.body.style.overflow = isOpen ? 'hidden' : null
-  }
+  }, [anchorRef, toggleMenu])
 
   return isOpen
           ? ReactDOM.createPortal(
-          <MenuContainer anchorRef={anchorRef} position={position} alignment={alignment}>
-              {children}
-            </MenuContainer>, anchorRef.current.parentElement
-          )
+              <MenuContainer 
+                anchorRef={anchorRef} 
+                position={position} 
+                alignment={alignment} 
+                close={toggleMenu}
+              >
+                {children}
+              </MenuContainer>, anchorRef.current.ownerDocument.body
+            )
           : null
 }
+
 export default Menu;

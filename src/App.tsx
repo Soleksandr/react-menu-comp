@@ -66,22 +66,24 @@ class MenuExample extends React.Component {
 
   btnContainerStyle = {
     display: 'inline-block', 
-    margin:'300px 0 300px 1400px',
+    margin:'300px',
   }
   render () {
     return (
-      <div style={{height: '2000px'}}>
+      // <div style={{height: '2000px'}}>
+      <>
         <button style={{margin: 200}} onClick={() => alert('a')}>aaaaaa</button>
-        <div id='aaa' tabIndex={-1} style={this.btnContainerStyle}>
-          <Btn ref={this.anchorRef}>toggle menu</Btn>
-        </div>
+        {/* <div id='aaa' tabIndex={-1} style={this.btnContainerStyle}>
+        </div> */}
+        <Btn ref={this.anchorRef}>toggle menu</Btn>
 
-        <Menu position="right" anchorRef={this.anchorRef}>
+        <Menu position="bottom" anchorRef={this.anchorRef}>
           <MenuLink reference="/">Menu item first</MenuLink>
           <MenuItem onClick={(e) => {console.log('-e-', e)}}>Menu item second</MenuItem>
           <MenuItem onClick={(e) => {console.log('-e-', e)}}>Menu item third</MenuItem>
         </Menu>
-      </div>
+      </>
+      // </div>
     );
   }
 }
