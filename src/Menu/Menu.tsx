@@ -1,6 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { Backdrop } from './Backdrop';
+import ReactDOM from 'react-dom'
 import { MenuContainer, HorizontalPosition, VerticalPosition, HorizontalAlignment, VerticalAlignment } from './MenuContainer';
 
 interface HorizontalMenu {
@@ -15,53 +14,55 @@ interface VerticalMenu {
   alignment?: VerticalAlignment;
 }
 
-declare type MenuProps = VerticalMenu | HorizontalMenu
+declare type MenuProps = VerticalMenu | HorizontalMenu;
 
-interface MenuState {
-  isOpen: boolean;
-}
+export const Menu: React.FC<MenuProps> = ({ 
+  children, 
+  anchorRef,
+  position = 'bottom', 
+  alignment = position === 'top' || position === 'bottom' ? 'left' : 'top' 
+}) => {
 
-export class Menu extends React.Component<MenuProps, MenuState> {
-  state = {
-    isOpen: false,
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
+  const preventDefault = (e: MouseEvent) => {
+    e.preventDefault()
+  } 
+
+  const toggleMenu = React.useCallback(() => {
+      anchorRef.current.parentElement.focus();
+      setIsOpen(!isOpen)
+  }, [isOpen, anchorRef]);
+
+  const closeMenuIfOpen = React.useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+
+  React.useEffect(() => {
+    const anchorElement = anchorRef.current;
+
+    anchorElement.addEventListener('click', toggleMenu);
+    anchorElement.addEventListener('mousedown', preventDefault);
+    anchorElement.parentElement.addEventListener('blur', closeMenuIfOpen)
+
+    return () => {
+      anchorElement.removeEventListener('click', toggleMenu);
+      anchorElement.removeEventListener('mousedown', preventDefault);
+      anchorElement.parentElement.removeEventListener('blur', closeMenuIfOpen)
+    };
+  }, [anchorRef, toggleMenu, closeMenuIfOpen])
+
+  if (anchorRef.current) {
+    anchorRef.current.ownerDocument.body.style.overflow = isOpen ? 'hidden' : null
   }
 
-  toggleMenu = () => {
-    this.setState({ isOpen: !this.state.isOpen})
-  }
-
-  componentDidMount () { 
-    this.props.anchorRef.current.addEventListener('click', this.toggleMenu);
-  }
-
-  componentWillUnmount () {
-    this.props.anchorRef.current.removeEventListener('click', this.toggleMenu);
-  }
-
-  render () {
-    const { isOpen } = this.state;
-    const { 
-      children, 
-      anchorRef, 
-      position = 'bottom', 
-      alignment = position === 'top' || position === 'bottom' ? 'left' : 'top' 
-    } = this.props;
-
-    if (anchorRef.current) {
-      anchorRef.current.ownerDocument.body.style.overflow = isOpen ? 'hidden' : null
-    }
-    
-    return isOpen
-      ? ReactDOM.createPortal(
-          <Backdrop onClick={this.toggleMenu}>
-            <MenuContainer anchorRef={anchorRef} position={position} alignment={alignment}>
+  return isOpen
+          ? ReactDOM.createPortal(
+          <MenuContainer anchorRef={anchorRef} position={position} alignment={alignment}>
               {children}
-            </MenuContainer>
-          </Backdrop>,
-          anchorRef.current.ownerDocument.body
-        )
-      : null
-  }
+            </MenuContainer>, anchorRef.current.parentElement
+          )
+          : null
 }
-
 export default Menu;

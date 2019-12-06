@@ -5,15 +5,16 @@ interface MenuItemProps {
   onClick: (e: React.SyntheticEvent<HTMLLIElement>) => any;
 }
 
-const LiStyled = styled.li(() => ({
+export const LiStyled = styled.li(() => ({
   padding: '8px 10px',
   listStyleType: 'none',
   margin: 0,
+  whiteSpace: 'nowrap',
   transition: 'all .3s',
   ':hover': {
     backgroundColor: '#DFDFDF'
   },
-  '&:first-child:hover': {
+  '&:first-of-type:hover': {
     borderRadius: '5px 5px 0 0'
   },
   '&:last-child:hover': {

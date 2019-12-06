@@ -21,11 +21,6 @@ interface MenuContainerProps {
   alignment: Alignment;
 }
 
-interface MenuContainerState {
-  boundingAnchorRect?: ClientRect;
-  boundingMenuContainerRect?: ClientRect;
-}
-
 const pickBoxShadow = (position: Position) => {
   const sharedPart = '6px rgba(0,0,0,0.2)'
   const sharedEdgePart = '1px rgba(0,0,0,0.03)'
@@ -107,36 +102,27 @@ const UlStyled = styled.ul<Indention & { position: Position}>(({ top, left , pos
   ...getOffset(position, Boolean(top && left))
 }))
 
+export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRef, position, alignment }) => {
+  let menuContainerRef: any;
+  menuContainerRef =  React.useRef();
 
+  const [boundingAnchorRect, changeBoundingAnchorRect] = React.useState()
+  const [boundingMenuContainerRect, changeBoundingMenuContainerRect] = React.useState()
 
-export class MenuContainer extends React.Component<MenuContainerProps, MenuContainerState> {
-  menuContainerRef: any
-
-  constructor(props: MenuContainerProps) {
-    super(props)
-
-    this.menuContainerRef = React.createRef()
-  }
-
-  state: MenuContainerState = {
-    boundingAnchorRect: undefined,
-    boundingMenuContainerRect: undefined,
-  }
-
-  _calculateDefaultIndentation = (boundingAnchorRect: ClientRect, offset: number): Indention => {
+  const _calculateDefaultIndentation = (boundingAnchorRect: ClientRect, offset: number): Indention => {
     return {
       top: boundingAnchorRect.bottom + offset,
       left: boundingAnchorRect.left
     }
   }
 
-  calculateIndentation = (boundingAnchorRect: ClientRect, boundingMenuContainerRect: ClientRect): Indention => {
+  const calculateIndentation = (boundingAnchorRect: ClientRect, boundingMenuContainerRect: ClientRect): Indention => {
     let indention: Indention;
     const offset = 3;
 
-    switch (`${this.props.position}-${this.props.alignment}`) {
+    switch (`${position}-${alignment}`) {
       case 'bottom-left':
-        indention = this._calculateDefaultIndentation(boundingAnchorRect, offset);
+        indention = _calculateDefaultIndentation(boundingAnchorRect, offset);
         break;
 
       case 'bottom-center':
@@ -217,45 +203,36 @@ export class MenuContainer extends React.Component<MenuContainerProps, MenuConta
         break;
     
       default:
-        indention = this._calculateDefaultIndentation(boundingAnchorRect, offset);
+        indention = _calculateDefaultIndentation(boundingAnchorRect, offset);
     }
-
+    console.log(indention)
     return indention;
   }
 
-  setBoundingAnchorRect = () => {
-    this.setState({ boundingAnchorRect: this.props.anchorRef.current.getBoundingClientRect() })
-  }
+  const setBoundingAnchorRect = React.useCallback(() => {
+    changeBoundingAnchorRect(anchorRef.current.getBoundingClientRect())
+  }, [anchorRef])
 
-  componentDidMount () {
-    const { anchorRef } = this.props;
+  React.useEffect(() => {
+    const anchorElement = anchorRef.current;
+    changeBoundingAnchorRect(anchorElement.getBoundingClientRect());
+    changeBoundingMenuContainerRect(menuContainerRef.current.getBoundingClientRect())
+    window.addEventListener('resize', setBoundingAnchorRect);
 
-    this.setState({ 
-      boundingAnchorRect: anchorRef.current.getBoundingClientRect(),
-      boundingMenuContainerRect: this.menuContainerRef.current.getBoundingClientRect(),
-    })
+    return () => {
+      window.removeEventListener('resize', setBoundingAnchorRect)
+    }
+  }, [anchorRef, menuContainerRef, setBoundingAnchorRect])
 
-    window.addEventListener('resize', this.setBoundingAnchorRect)
-  }
+  const { top = 0, left = 0 } = boundingAnchorRect && boundingMenuContainerRect
+    ? calculateIndentation(boundingAnchorRect, boundingMenuContainerRect) 
+    : {}
 
-  componentWillUnmount () {
-    window.removeEventListener('resize', this.setBoundingAnchorRect);
-  }
-
-  render () {
-    const { boundingAnchorRect, boundingMenuContainerRect } = this.state;
-    const { children, position } = this.props;
-
-    const { top = 0, left = 0 } = boundingAnchorRect && boundingMenuContainerRect
-      ? this.calculateIndentation(boundingAnchorRect, boundingMenuContainerRect) 
-      : {}
-
-    return (
-      <MenuContainerStyled ref={this.menuContainerRef} top={top} left={left} position={position}>
-        <UlStyled top={top} left={left} position={position}>
-          {children}
-        </UlStyled>
-      </MenuContainerStyled>
-    ) 
-  }
+  return (
+    <MenuContainerStyled ref={menuContainerRef} top={top} left={left} position={position}>
+      <UlStyled data-menu="list" top={top} left={left} position={position}>
+        {children}
+      </UlStyled>
+    </MenuContainerStyled>
+  ) 
 }
