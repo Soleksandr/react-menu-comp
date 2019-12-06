@@ -77,10 +77,11 @@ class MenuExample extends React.Component {
         </div> */}
         <Btn ref={this.anchorRef}>toggle menu</Btn>
 
-        <Menu position="bottom" anchorRef={this.anchorRef}>
-          <MenuLink reference="/">Menu item first</MenuLink>
+        <Menu position="left" anchorRef={this.anchorRef}>
+          {/* <MenuLink reference="/">Menu item first</MenuLink> */}
           <MenuItem onClick={(e) => {console.log('-e-', e)}}>Menu item second</MenuItem>
           <MenuItem onClick={(e) => {console.log('-e-', e)}}>Menu item third</MenuItem>
+          <MenuItem as="a" onClick={(e) => {console.log('-e-', e)}}>Link</MenuItem>
         </Menu>
       </>
       // </div>

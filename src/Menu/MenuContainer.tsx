@@ -88,9 +88,9 @@ const MenuContainerStyled = styled.div<Indention & { position: Position}>(props 
   top: props.top,
   left: props.left ,
   zIndex: zIndex + 1,
-  ':focus': {
-    outline: 'none'
-  }
+  // ':focus': {
+  //   outline: 'none'
+  // }
 }))
 
 const UlStyled = styled.ul<Indention & { position: Position}>(({ top, left , position}) => ({
@@ -217,19 +217,50 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
     changeBoundingAnchorRect(anchorRef.current.getBoundingClientRect())
   }, [anchorRef])
 
+  let timeoutIndex: number | null = null
+  
+  const closeMenu = (e: any) => {
+    console.log('-focusout-')
+    timeoutIndex = setTimeout(() => close(e));
+  }
+
+  const onKeyDown = (e:any) => {
+    console.log('-keydown-', e.keyCode)
+    if (e.keyCode === 40 || e.keyCode === 38) {
+      const aArray = menuContainerRef.current.getElementsByTagName('a');
+      const buttonArray = menuContainerRef.current.getElementsByTagName('button');
+      const arr = [...aArray, ...buttonArray]
+      
+      const activeIndex = arr.findIndex(el => el === document.activeElement)
+      
+      console.log('= e =', timeoutIndex)
+      activeIndex === -1 || activeIndex === arr.length - 1
+      ? arr[0].focus() 
+      : arr[activeIndex + 1].focus() 
+      console.log('= inside if =', timeoutIndex)
+      timeoutIndex && clearTimeout(timeoutIndex)
+    }
+    // console.log('= out =', timeoutIndex)
+  }
+
   React.useEffect(() => {
     const anchorElement = anchorRef.current;
+    const menuContainerElement =  menuContainerRef.current;
+
     changeBoundingAnchorRect(anchorElement.getBoundingClientRect());
     changeBoundingMenuContainerRect(menuContainerRef.current.getBoundingClientRect())
 
     window.addEventListener('resize', setBoundingAnchorRect);
 
-    menuContainerRef.current.focus()
-    menuContainerRef.current.addEventListener('focusout', close)
+    menuContainerElement.focus()
+    menuContainerElement.addEventListener('blur', closeMenu)
+    menuContainerElement.addEventListener('keydown', onKeyDown)
 
     return () => {
       window.removeEventListener('resize', setBoundingAnchorRect)
-      menuContainerRef.current.removeEventListener('focusout', close)
+
+      menuContainerElement.removeEventListener('blur', closeMenu)
+      menuContainerElement.removeEventListener('keyup', onKeyDown)
     }
   }, [anchorRef, menuContainerRef, setBoundingAnchorRect])
 
@@ -238,7 +269,7 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
     : {}
 
   return (
-    <MenuContainerStyled ref={menuContainerRef} top={top} left={left} position={position} tabIndex={0}>
+    <MenuContainerStyled ref={menuContainerRef} top={top} left={left} position={position} tabIndex={-1}>
       <UlStyled 
         top={top} 
         left={left} 

@@ -30,7 +30,6 @@ export const Menu: React.FC<MenuProps> = ({
   } 
 
   const toggleMenu = React.useCallback(() => {
-    console.log('-- toggle --')
       setIsOpen(!isOpen)
   }, [isOpen, anchorRef]);
 
@@ -57,6 +56,16 @@ export const Menu: React.FC<MenuProps> = ({
               </MenuContainer>, anchorRef.current.ownerDocument.body
             )
           : null
+  // return ReactDOM.createPortal(
+  //   <MenuContainer 
+  //     anchorRef={anchorRef} 
+  //     position={position} 
+  //     alignment={alignment} 
+  //     close={toggleMenu}
+  //   >
+  //     {children}
+  //   </MenuContainer>,  anchorRef.current ? anchorRef.current.ownerDocument.body : document.body
+  // )
 }
 
 export default Menu;
