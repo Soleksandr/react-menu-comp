@@ -114,8 +114,8 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
 
   const _calculateDefaultIndentation = (boundingAnchorRect: ClientRect, offset: number): Indention => {
     return {
-      top: boundingAnchorRect.bottom + offset,
-      left: boundingAnchorRect.left
+      top: boundingAnchorRect.bottom + offset + window.scrollY,
+      left: boundingAnchorRect.left + window.scrollX
     }
   }
 
@@ -130,78 +130,78 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
 
       case 'bottom-center':
         indention = {
-          top: boundingAnchorRect.bottom + offset,
-          left: boundingAnchorRect.left - boundingMenuContainerRect.width / 2 + boundingAnchorRect.width / 2
+          top: boundingAnchorRect.bottom + window.scrollY + offset,
+          left: boundingAnchorRect.left - boundingMenuContainerRect.width / 2 + boundingAnchorRect.width / 2  + window.scrollX
         }
         break;
 
       case 'bottom-right':
         indention = {
-          top: boundingAnchorRect.bottom + offset,
-          left: boundingAnchorRect.right - boundingMenuContainerRect.width
+          top: boundingAnchorRect.bottom + offset + window.scrollY ,
+          left: boundingAnchorRect.right - boundingMenuContainerRect.width + window.scrollX
         }
         break;
       
       case 'top-left':
         indention = {
-          top: boundingAnchorRect.top - boundingMenuContainerRect.height - offset,
-          left: boundingAnchorRect.left
+          top: boundingAnchorRect.top - boundingMenuContainerRect.height - offset  + window.scrollY,
+          left: boundingAnchorRect.left  + window.scrollX
         }
         break;
 
       case 'top-center':
         indention = {
-          top: boundingAnchorRect.top - boundingMenuContainerRect.height - offset,
-          left: boundingAnchorRect.left - boundingMenuContainerRect.width / 2 + boundingAnchorRect.width / 2
+          top: boundingAnchorRect.top - boundingMenuContainerRect.height - offset + window.scrollY,
+          left: boundingAnchorRect.left - boundingMenuContainerRect.width / 2 + boundingAnchorRect.width / 2  + window.scrollX
         }
         break;
 
       case 'top-right':
         indention = {
-          top: boundingAnchorRect.top - boundingMenuContainerRect.height - offset,
-          left: boundingAnchorRect.right - boundingMenuContainerRect.width
+          top: boundingAnchorRect.top - boundingMenuContainerRect.height - offset + window.scrollY,
+          left: boundingAnchorRect.right - boundingMenuContainerRect.width  + window.scrollX
         }
         break;
       
       case 'left-top':
         indention = {
-          top: boundingAnchorRect.top,
-          left: boundingAnchorRect.left - boundingMenuContainerRect.width - offset
+          top: boundingAnchorRect.top + window.scrollY,
+          left: boundingAnchorRect.left - boundingMenuContainerRect.width - offset  + window.scrollX
         }
         break;
 
       case 'left-center':
         indention = {
-          top: boundingAnchorRect.top - boundingMenuContainerRect.height / 2 + boundingAnchorRect.height / 2,
-          left: boundingAnchorRect.left - boundingMenuContainerRect.width - offset
+          top: boundingAnchorRect.top - boundingMenuContainerRect.height / 2 + boundingAnchorRect.height / 2 + window.scrollY,
+          left: boundingAnchorRect.left - boundingMenuContainerRect.width - offset  + window.scrollX
         }
         break;
 
       case 'left-bottom':
         indention = {
-          top: boundingAnchorRect.bottom - boundingMenuContainerRect.height,
-          left: boundingAnchorRect.left - boundingMenuContainerRect.width - offset
+          top: boundingAnchorRect.bottom - boundingMenuContainerRect.height + window.scrollY,
+          left: boundingAnchorRect.left - boundingMenuContainerRect.width - offset  + window.scrollX
         }
         break;
       
       case 'right-top':
         indention = {
-          top: boundingAnchorRect.top,
-          left: boundingAnchorRect.right + offset
+          top: boundingAnchorRect.top + window.scrollY,
+          left: boundingAnchorRect.right + offset + window.scrollX
         }
         break;
 
       case 'right-center':
         indention = {
-          top: boundingAnchorRect.top - boundingMenuContainerRect.height / 2 + boundingAnchorRect.height / 2,
-          left: boundingAnchorRect.right + offset
+          top: boundingAnchorRect.top - boundingMenuContainerRect.height / 2 + boundingAnchorRect.height / 2 + window.scrollY,
+          left: boundingAnchorRect.right + offset  + window.scrollX
         }
         break;
 
       case 'right-bottom':
         indention = {
-          top: boundingAnchorRect.bottom - boundingMenuContainerRect.height,
-          left: boundingAnchorRect.right + offset
+          top: boundingAnchorRect.bottom - boundingMenuContainerRect.height + window.scrollY,
+          left: boundingAnchorRect.right + offset  + window.scrollX
         }
         break;
     
@@ -219,10 +219,14 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
   let timeoutIndex: any = React.useRef()
   
   const closeMenu = React.useCallback((e: any) => {
+    console.log('-- loose focus --')
     timeoutIndex.current = setTimeout(() => close(e));
   }, [close, timeoutIndex])
 
-  const onKeyDown = React.useCallback((e:any) => {
+  
+
+  const focusMenuItem = React.useCallback((e:any) => {
+    console.log('--')
     if (e.keyCode === 40 || e.keyCode === 38) {
       const listItemsArray = menuContainerRef.current.getElementsByTagName('ul')[0].children
       const focusAbleList = Array.from(listItemsArray).map((li: any) => li.firstChild)
@@ -236,30 +240,32 @@ export const MenuContainer: React.FC<MenuContainerProps> = ({ children, anchorRe
         focusAbleList[activeIndex - 1].focus()
       }
 
-      timeoutIndex && clearTimeout(timeoutIndex.current)
+      clearTimeout(timeoutIndex.current)
     }
   }, [menuContainerRef, timeoutIndex])
 
   React.useEffect(() => {
     const anchorElement = anchorRef.current;
     const menuContainerElement =  menuContainerRef.current;
-
+    console.log('use effect')
     changeBoundingAnchorRect(anchorElement.getBoundingClientRect());
-    changeBoundingMenuContainerRect(menuContainerRef.current.getBoundingClientRect())
+    changeBoundingMenuContainerRect(menuContainerElement.getBoundingClientRect())
 
     window.addEventListener('resize', setBoundingAnchorRect);
 
-    menuContainerElement.focus()
+    // menuContainerElement.focus()
+    anchorElement.addEventListener('keydown', focusMenuItem)
     menuContainerElement.addEventListener('focusout', closeMenu)
-    menuContainerElement.addEventListener('keydown', onKeyDown)
+    menuContainerElement.addEventListener('keydown', focusMenuItem)
 
     return () => {
       window.removeEventListener('resize', setBoundingAnchorRect)
 
+      anchorElement.removeEventListener('keydown', focusMenuItem)
       menuContainerElement.removeEventListener('focusout', closeMenu)
-      menuContainerElement.removeEventListener('keyup', onKeyDown)
+      menuContainerElement.removeEventListener('keydown', focusMenuItem)
     }
-  }, [anchorRef, closeMenu, menuContainerRef, onKeyDown, setBoundingAnchorRect])
+  }, [anchorRef, menuContainerRef, setBoundingAnchorRect, focusMenuItem, closeMenu])
 
   const { top = 0, left = 0 } = boundingAnchorRect && boundingMenuContainerRect
     ? calculateIndentation(boundingAnchorRect, boundingMenuContainerRect) 
