@@ -29,7 +29,8 @@ export const Menu: React.FC<MenuProps> = ({
     e.preventDefault()
   } 
 
-  const toggleMenu = React.useCallback(() => {
+  const toggleMenu = React.useCallback((e: any) => {
+      e.target.focus()
       setIsOpen(!isOpen)
   }, [isOpen]);
 
@@ -44,8 +45,8 @@ export const Menu: React.FC<MenuProps> = ({
     };
   }, [anchorRef, toggleMenu])
 
-  return isOpen || true
-    ? ReactDOM.createPortal(
+  return isOpen
+    ? 
         <MenuContainer 
           anchorRef={anchorRef} 
           position={position} 
@@ -53,8 +54,7 @@ export const Menu: React.FC<MenuProps> = ({
           close={toggleMenu}
         >
           {children}
-        </MenuContainer>, anchorRef.current ? anchorRef.current.ownerDocument.body : document.body
-      )
+        </MenuContainer>
     : null
 }
 
