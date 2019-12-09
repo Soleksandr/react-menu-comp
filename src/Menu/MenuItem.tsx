@@ -1,43 +1,25 @@
 import React from 'react';
 import styled from '@emotion/styled';
 
-interface MenuItemProps {
-  as?: 'a' | 'button';
-  onClick: (e: React.SyntheticEvent<HTMLLIElement>) => any;
+interface IMenuItemProps {
+  children: React.ReactElement<any>;
 }
 
-export const LiStyled = styled.li({
-  // padding: '8px 10px',
-  listStyleType: 'none',
-  margin: 0,
-  whiteSpace: 'nowrap',
-  ':hover': {
-    backgroundColor: '#DFDFDF'
-  },
-   '&:first-of-type:hover': {
-      borderRadius: '5px 5px 0 0'
-    },
-    '&:last-child:hover': {
-      borderRadius: ' 0 0 5px 5px'
-    },
-  
-  '& > a, & > button': {
-    display: 'flex',
+const LiStyled = styled.li({
+  'button': {
+    padding: '10px 15px',
+    margin: 0,
     border: 'none',
-    fontSize: '1em',
-    textAlign: 'left',
-    padding: '7px 12px',
-    background: 'transparent',
-    transition: 'all .3s',
+    backgroundColor: 'transparent',
+
+    '&:hover': {
+      backgroundColor: 'grey'
+    }
   }
 })
 
-export const MenuItem: React.FC<MenuItemProps> = ({ children, onClick, as = 'button' }) => {
+export const MenuItem: React.FC<IMenuItemProps> = ({ children }) => {
   return (
-    <LiStyled>
-      {
-        React.createElement(as, { onClick, href: '#' }, children)
-      }
-    </LiStyled>
-  )
-}
+    <LiStyled><button>{children}</button></LiStyled>
+  );
+}; 

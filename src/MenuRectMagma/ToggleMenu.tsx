@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { Button, CaretDownIcon, ButtonSize, ButtonShape } from 'react-magma-dom';
+import { StyledButton } from '../components/StyledButton'
 
 const ToggleWrapper = styled.div<any>((props) => ({
   display: 'flex',
@@ -8,14 +10,15 @@ const ToggleWrapper = styled.div<any>((props) => ({
 
 const ToggleContent = styled.div<any>((props) => ({
   display: 'flex',
-  alignItems: 'center'
+  alignItems: 'center',
+  height: 29,
 }))
 
-const ToggleButton = styled.button<any>((props) => ({
-  padding: '10px 15px',
+const ToggleButton = styled<any>(Button)((props) => ({
   display: 'flex',
   alignItems: 'center',
-  backgroundColor: 'blue'
+  minWidth: 'auto',
+  margin: 3
 }))
 
 const ArrowDown = styled.div({
@@ -34,14 +37,14 @@ export const ToggleMenu: React.FC<IToggleMenuProps> = React.forwardRef(({ childr
     standAloneButton 
       ? <ToggleWrapper>
           <ToggleContent style={{backgroundColor: 'blue'}}>{children}</ToggleContent>
-          <ToggleButton ref={ref} {...other} >
-            <ArrowDown>&#8661;</ArrowDown>
-          </ToggleButton>
+          <StyledButton iconOnly shape={ButtonShape.rightCap} size={ButtonSize.small} ref={ref} {...other} >
+            <CaretDownIcon size={12}  />
+          </StyledButton>
         </ToggleWrapper>
       : <>
           <ToggleButton ref={ref} {...other} >
             {children}
-            <ArrowDown>&#8661;</ArrowDown>
+            <CaretDownIcon />
           </ToggleButton>
         </>
   );
